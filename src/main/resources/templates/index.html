@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Jogo da Vida</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(40, 20px);
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #ccc;
+            background-color: #fff;
+        }
+
+        .alive {
+            background-color: #000;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .buttons button {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Jogo da Vida</h1>
+    <div class="board"></div>
+    <div class="buttons">
+        <button onclick="play()">Começar</button>
+        <button onclick="pause()">Pausar</button>
+        <button onclick="clearBoard()">Limpar</button>
+    </div>
+    <script>
+        const board = document.querySelector('.board');
+        let cells = [];
+        let timer;
+
+        function createBoard() {
+            for (let i = 0; i < 400; i++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.addEventListener('click', toggleCellState);
+                board.appendChild(cell);
+                cells.push(cell);
+            }
+        }
+
+        function toggleCellState() {
+            this.classList.toggle('alive');
+        }
+
+        function play() {
+            timer = setInterval(updateBoard, 500);
+        }
+
+        function pause() {
+            clearInterval(timer);
+        }
+
+        function clearBoard() {
+            cells.forEach(cell => {
+                cell.classList.remove('alive');
+            });
+        }
+
+        function updateBoard() {
+            const nextGeneration = [];
+
+            cells.forEach((cell, index) => {
+                const aliveNeighbors = getAliveNeighbors(index);
+
+                if (cell.classList.contains('alive')) {
+                    if (aliveNeighbors === 2 || aliveNeighbors === 3) {
+                        nextGeneration.push(true);
+                    } else {
+                        nextGeneration.push(false);
+                        cell.classList.remove('alive');
+                    }
+                } else {
+                    if (aliveNeighbors === 3) {
+                        nextGeneration.push(true);
+                        cell.classList.add('alive');
+                    } else {
+                        nextGeneration.push(false);
+                    }
+                }
+            });
+
+            for (let i = 0; i < cells.length; i++) {
+                if (nextGeneration[i]) {
+                    cells[i].classList.add('alive');
+                } else {
+                    cells[i].classList.remove('alive');
+                }
+            }
+        }
+
+        function getAliveNeighbors(index) {
+            const neighbors = [
+                index - 41, index - 40, index - 39,
+                index - 1, index + 1,
+                index + 39, index + 40, index + 41
+            ];
+
+            return neighbors.reduce((count, neighbor) => {
+                if (cells[neighbor] && cells[neighbor].classList.contains('alive')) {
+                    return count + 1;
+                }
+                return count;
+            }, 0);
+        }
+
+        createBoard();
+    </script>
+</body>
+</html>
+
